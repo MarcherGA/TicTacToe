@@ -24,18 +24,21 @@ namespace TicTacToe
 
             _button = GetComponent<Button>();
             _button.onClick.AddListener(TileClicked);
+
+            _button.image.enabled = false;
         }
 
         public void UpdateTile(char value,Sprite sprite) 
         {
             _value = value;
             _button.image.sprite = sprite;
+            _button.image.enabled = true;
         }
 
-        public void ResetTile(Sprite emptyTile)
+        public void ResetTile()
         {
             _value = _defaultValue;
-            _button.image.sprite = emptyTile;
+            _button.image.enabled = false;
         }
 
     }
