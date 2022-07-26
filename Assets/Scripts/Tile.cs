@@ -9,36 +9,73 @@ namespace TicTacToe
     [RequireComponent(typeof(Button))]
     public class Tile : MonoBehaviour
     {
-        public UnityAction TileClicked;
-        public char Value { get => _value; }
-
+        public UnityAction OnTileClicked;
 
         private Button _button;
-        private char _value;
+        private Coroutine currentFlicker;
 
-        private readonly static char _defaultValue = ' ';
+        private void Awake()
+        {
+            
+            _button = GetComponent<Button>();
+        }
 
         private void Start()
         {
-            _value = _defaultValue;
-
-            _button = GetComponent<Button>();
-            _button.onClick.AddListener(TileClicked);
-
-            _button.image.enabled = false;
+            _button.onClick.AddListener(OnTileClicked);
+            SetImgAlpha(0f);
         }
 
-        public void UpdateTile(char value,Sprite sprite) 
+        public void SetActiveButton(bool isOn)
         {
-            _value = value;
-            _button.image.sprite = sprite;
-            _button.image.enabled = true;
+            _button.enabled = isOn;
+        }
+
+        public void UpdateTile(TicTacToeGrid.Sign sign) 
+        {
+            StopFlicker();
+            _button.image.sprite = GameSettings.Instance.GameTextures.GetSignImage(sign);
+            SetImgAlpha(1f);
+            _button.enabled = false;
         }
 
         public void ResetTile()
         {
-            _value = _defaultValue;
-            _button.image.enabled = false;
+            _button.image.sprite = null;
+           SetImgAlpha(0f);
+        }
+
+        private void SetImgAlpha(float alpha)
+        {
+            Color color = _button.image.color;
+            color.a = alpha;
+            _button.image.color = color;
+        }
+
+        public void Flicker(int length)
+        {
+            currentFlicker = StartCoroutine(flicker(length));
+        }
+
+        private void StopFlicker()
+        {
+            if (currentFlicker != null)
+            {
+                StopCoroutine(currentFlicker);
+                currentFlicker = null;
+            }
+        }
+
+        private IEnumerator flicker(int length)
+        {
+            float timeLeft = length;
+            while (timeLeft > 0)
+            {
+                SetImgAlpha((Mathf.Sin(Time.time * 4) + 1) / 4);
+                timeLeft -= Time.deltaTime;
+                yield return null;
+            }
+            SetImgAlpha(0f);
         }
 
     }

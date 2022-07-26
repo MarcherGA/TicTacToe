@@ -1,28 +1,24 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace TicTacToe
 {
     public class TurnController
     {
-        private Stack<Tile> _turnHistory;
-        private Timer _turnTimer;
-
+        private Stack<TilePosition> _turnHistory;
         public TurnController()
         {
-            _turnHistory = new Stack<Tile>();
+            _turnHistory = new Stack<TilePosition>();
         }
 
-        public void MakeTurn(Tile tileChanged)
+        public void MakeTurn(TilePosition tileChanged)
         {
             _turnHistory.Push(tileChanged);
-            _turnTimer.ResetTimer();
         }
-        public void UndoTurn()
+        public TilePosition UndoTurn()
         {
-            Tile lastChangedTile = _turnHistory.Pop();
-            lastChangedTile.ResetTile();
+            TilePosition lastChangedTile = _turnHistory.Pop();
+            return lastChangedTile;
         }
 
         public void ResetHistory()

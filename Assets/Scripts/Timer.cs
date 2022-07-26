@@ -1,39 +1,56 @@
 using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 using UnityEngine.Events;
 
 public class Timer : MonoBehaviour
 {
-    [SerializeField] private int TimerLength;
-    [SerializeField] private Text TimerText;
+    public int TimerLength { get => _timerLength; set => _timerLength = value; }
+    
+    [SerializeField] private TMP_Text TimerText;
+    private int _timerLength;
     private bool isTimerOn = false;
+    private Coroutine _currentTimer;
 
-    [HideInInspector] public UnityEvent TimerEnded;
+    public Action OnTimerEnd;
+
+    public void ResetTimer(int timerLength)
+    {
+        TimerLength = timerLength;
+        ResetTimer();
+    }
+
     public void ResetTimer()
     {
         if (isTimerOn)
-            StopCoroutine(resetTimer());
-        StartCoroutine(resetTimer());
+            Stop();
+        _currentTimer = StartCoroutine(resetTimer());
+    }
+    public void Stop()
+    {
+          StopCoroutine(_currentTimer);
     }
 
     IEnumerator resetTimer()
     {
         float timeLeft = TimerLength;
+        isTimerOn = true;
         while (timeLeft > 0)
         {
-            yield return null;
-            timeLeft -= Time.deltaTime;
             updateTimerText(timeLeft);
+            timeLeft -= Time.deltaTime;
+            yield return null;
         }
-        TimerEnded?.Invoke();
+
+        isTimerOn = false;
+        OnTimerEnd?.Invoke();
     }
 
     void updateTimerText(float currentTime)
     {
-        float minutes = Mathf.FloorToInt(currentTime / 60);
-        float seconds = Mathf.FloorToInt(currentTime % 60);
+        float minutes = Mathf.RoundToInt(currentTime / 60);
+        float seconds = Mathf.RoundToInt(currentTime % 60);
 
         TimerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
     }
