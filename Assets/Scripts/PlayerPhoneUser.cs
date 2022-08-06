@@ -8,9 +8,11 @@ namespace TicTacToe
         {
             Sign = sign;
         }
+        public PlayerPhoneUser()
+        {
+        }
 
-
-        public override void PlayTurn()
+        public override void PlayTurn(IGridState grid)
         {
             GameEventsManager.Instance.OnTilePress += DoTurn;
             GameEventsManager.Instance.WaitForPlayerPress(true);

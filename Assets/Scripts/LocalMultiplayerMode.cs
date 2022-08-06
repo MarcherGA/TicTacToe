@@ -24,12 +24,12 @@ namespace TicTacToe
             _player2 = new PlayerPhoneUser(TicTacToeGrid.Sign.O);
         }
 
-        public void StartGame()
+        public void StartGame(IGridState grid)
         {
 
             GameEventsManager.Instance.SetActiveTurnTimer(true);
             GameEventsManager.Instance.ResetTurnTimer();
-            Player1.PlayTurn();
+            Player1.PlayTurn(grid);
         }
 
         public void EndGame(TicTacToeGrid.Result result)
@@ -37,10 +37,10 @@ namespace TicTacToe
             GameEventsManager.Instance.SetActiveTurnTimer(false);
         }
 
-        public void OnPlayerTurn(TicTacToeGrid.Sign sign)
+        public void OnPlayerTurn(TicTacToeGrid.Sign sign, IGridState grid)
         {
             GameEventsManager.Instance.ResetTurnTimer();
-            GetPlayer(sign == TicTacToeGrid.Sign.X ? TicTacToeGrid.Sign.O : TicTacToeGrid.Sign.X).PlayTurn();
+            GetPlayer(sign == TicTacToeGrid.Sign.X ? TicTacToeGrid.Sign.O : TicTacToeGrid.Sign.X).PlayTurn(grid);
         }
 
         private Player GetPlayer(TicTacToeGrid.Sign sign)

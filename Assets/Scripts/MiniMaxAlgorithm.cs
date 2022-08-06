@@ -8,7 +8,8 @@ namespace TicTacToe
     public class MiniMaxAlgorithm
     {
 
-        public static TilePosition GetBestMove(GridState state)
+        //check depth = 0 means no limit
+        public static TilePosition GetBestMove(IGridState state, int checkDepth)
         {
             var sign = state.CurrentPlayer;
             var clonedGrid = state.Clone();
@@ -19,7 +20,7 @@ namespace TicTacToe
             // go through all available moves and get a minmax score for each. Then chose the best move.
             foreach (var move in availableMoves)
             {
-                var score = GetMinMaxScoreForMovesRecursive(sign, move, state.Clone(), 1);
+                var score = GetMinMaxScoreForMovesRecursive(sign, move, state.Clone(), 1, checkDepth);
                 scores[move] = score;
 
                 if (score > topScore)
@@ -44,8 +45,11 @@ namespace TicTacToe
             return topMoves[rndIndex];
         }
 
-        private static int GetMinMaxScoreForMovesRecursive(TicTacToeGrid.Sign sign, TilePosition move, GridState state, int depth)
+        private static int GetMinMaxScoreForMovesRecursive(TicTacToeGrid.Sign sign, TilePosition move, GridState state, int depth, int checkDepth)
         {
+            if (depth > checkDepth && checkDepth != 0)
+                return DrawScore();
+
             // make the move on the cloned board
             state.MakeTurn(sign, move);
 
@@ -56,7 +60,7 @@ namespace TicTacToe
             }
             else if(state.IsWin(TicTacToeGrid.Sign.O))
             {
-                return WinOrLoseScore(sign, TicTacToeGrid.Sign.X, depth);
+                return WinOrLoseScore(sign, TicTacToeGrid.Sign.O , depth);
             }
             else if(state.IsFull)
             {
@@ -72,7 +76,7 @@ namespace TicTacToe
 
             for (var i = 0; i < nextAvailableMoves.Count; i++)
             {
-                var score = GetMinMaxScoreForMovesRecursive(sign, nextAvailableMoves[i], state.Clone(), depth);
+                var score = GetMinMaxScoreForMovesRecursive(sign, nextAvailableMoves[i], state.Clone(), depth, checkDepth);
                 scores[i] = score;
             }
 
@@ -92,6 +96,9 @@ namespace TicTacToe
 
         private static int WinOrLoseScore(TicTacToeGrid.Sign mySign, TicTacToeGrid.Sign winningSign, int depth)
         {
+            if (depth == 1 && mySign != winningSign)
+                return WinScore(depth + 1);
+
             return mySign == winningSign
                 ? WinScore(depth)
                 : LoseScore(depth);

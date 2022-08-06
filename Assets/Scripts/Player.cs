@@ -6,6 +6,6 @@ namespace TicTacToe
         public TicTacToeGrid.Sign Sign { get => _sign; set => _sign = value; }
         private TicTacToeGrid.Sign _sign;
 
-        public abstract void PlayTurn();
+        public abstract void PlayTurn(IGridState grid);
     }
 }

@@ -1,0 +1,23 @@
+ManifestFileVersion: 0
+CRC: 1007005744
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 816b9cc280ac25f76a878bf1fdc02a81
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 288c6fe7eb7cd28ea081b02168707f37
+HashAppended: 0
+ClassTypes:
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: c993c3e8e1f1bb344851b02899cc54e3, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/GameTextures.asset
+Dependencies: []

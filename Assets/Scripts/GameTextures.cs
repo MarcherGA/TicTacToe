@@ -33,4 +33,17 @@ public class GameTextures : ScriptableObject
                 return null;
         }
     }
+
+    public float GetSignImageAlpha(TicTacToe.TicTacToeGrid.Sign sign)
+    {
+        switch (sign)
+        {
+            case TicTacToe.TicTacToeGrid.Sign.X:
+                return 1f;
+            case TicTacToe.TicTacToeGrid.Sign.O:
+                return 1f;
+            default:
+                return 0f;
+        }
+    }
 }

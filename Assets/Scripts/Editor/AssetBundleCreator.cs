@@ -19,7 +19,7 @@ public static class AssetBundleCreator
     {
         string assetBundleSavePath = Path.Combine(assetBundleRootSavePath, assetBundleName, "bundle");
 
-        Utilities.CreateDirectoryIfNotExists(assetBundleRootSavePath);
+        Utilities.CreateDirectoryIfNotExists(Path.Combine(assetBundleRootSavePath, assetBundleName));
         Utilities.CreateDirectoryIfNotExists(assetBundleSavePath);
 
         foreach (var asset in assetList)

@@ -2,7 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using System.Reflection;
+using UnityEngine.SceneManagement;
+using UnityEngine.Events;
 
 namespace TicTacToe
 {
@@ -10,7 +12,13 @@ namespace TicTacToe
     {
         #region Singleton
         private static readonly GameEventsManager _instance = new GameEventsManager();
-        private GameEventsManager() { }
+        private GameEventsManager() 
+        {
+            SceneManager.sceneUnloaded += (Scene scene) =>
+            {
+                ClearEvents();
+            };
+        }
         public static GameEventsManager Instance
         {
             get
@@ -21,10 +29,7 @@ namespace TicTacToe
         #endregion
 
         public Action OnRestartGame;
-        public void RestartGame()
-        {
-            OnRestartGame?.Invoke();
-        }
+        public void RestartGame() { OnRestartGame?.Invoke(); }
 
         public Action<bool> OnWaitForPlayerPress;
         public void WaitForPlayerPress(bool isOn) { OnWaitForPlayerPress?.Invoke(isOn); }
@@ -61,5 +66,15 @@ namespace TicTacToe
 
         public Action OnGameTexturesChanged;
         public void GameTexturesChanged() { OnGameTexturesChanged?.Invoke(); }
+        public void ClearEvents() 
+        {
+            foreach (var field in GetType().GetFields())
+            {
+                if (field.IsPublic && !field.IsStatic && field.Name.Substring(0,2) == "On")
+                {
+                    field.SetValue(Instance, null);
+                }
+            }
+        }
     }
 }

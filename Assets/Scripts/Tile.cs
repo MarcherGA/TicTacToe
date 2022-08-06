@@ -9,21 +9,22 @@ namespace TicTacToe
     [RequireComponent(typeof(Button))]
     public class Tile : MonoBehaviour
     {
+        public bool isFlicker { get => _isFlicker; }
+
         public UnityAction OnTileClicked;
 
         private Button _button;
         private Coroutine currentFlicker;
+        private bool _isFlicker = false;
 
         private void Awake()
         {
-            
             _button = GetComponent<Button>();
         }
 
         private void Start()
         {
             _button.onClick.AddListener(OnTileClicked);
-            SetImgAlpha(0f);
         }
 
         public void SetActiveButton(bool isOn)
@@ -35,14 +36,23 @@ namespace TicTacToe
         {
             StopFlicker();
             _button.image.sprite = GameSettings.Instance.GameTextures.GetSignImage(sign);
-            SetImgAlpha(1f);
-            _button.enabled = false;
+            SetImgAlpha(GameSettings.Instance.GameTextures.GetSignImageAlpha(sign));
+            if(sign != TicTacToeGrid.Sign.Empty)
+            {
+                SoundManager.Instance.PlayTileClickedSound();
+                _button.enabled = false;
+            }
+            else 
+            {
+                _button.enabled = true;
+            }
+            
         }
 
         public void ResetTile()
         {
             _button.image.sprite = null;
-           SetImgAlpha(0f);
+            SetImgAlpha(0f);
         }
 
         private void SetImgAlpha(float alpha)
@@ -54,15 +64,15 @@ namespace TicTacToe
 
         public void Flicker(int length)
         {
+            _isFlicker = true;
             currentFlicker = StartCoroutine(flicker(length));
         }
 
         private void StopFlicker()
         {
-            if (currentFlicker != null)
+            if (isFlicker)
             {
                 StopCoroutine(currentFlicker);
-                currentFlicker = null;
             }
         }
 
@@ -76,6 +86,7 @@ namespace TicTacToe
                 yield return null;
             }
             SetImgAlpha(0f);
+            _isFlicker = false;
         }
 
     }

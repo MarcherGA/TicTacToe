@@ -8,10 +8,10 @@ using TicTacToe;
 [RequireComponent(typeof(Button))]
 public class HintButton : MonoBehaviour
 {
-    [SerializeField] private int HintLength = 2;
+    public int HintLength = 2;
     private Button _button;
 
-    private void Start()
+    private void Awake()
     {
         _button = GetComponent<Button>();
         _button.onClick.AddListener(delegate { GameEventsManager.Instance.DisplayHint(HintLength); });

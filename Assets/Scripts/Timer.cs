@@ -23,13 +23,13 @@ public class Timer : MonoBehaviour
 
     public void ResetTimer()
     {
-        if (isTimerOn)
-            Stop();
+        Stop();
         _currentTimer = StartCoroutine(resetTimer());
     }
     public void Stop()
     {
-          StopCoroutine(_currentTimer);
+        if (isTimerOn)
+            StopCoroutine(_currentTimer);
     }
 
     IEnumerator resetTimer()

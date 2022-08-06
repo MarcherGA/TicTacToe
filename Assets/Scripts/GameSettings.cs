@@ -14,56 +14,132 @@ public class GameSettings : ScriptableObject
     { 
         get 
         {
-            if (!isInitialized)
+            if (!isInstance)
             {
-                isInitialized = true;
+                isInstance = true;
                 _instance = CreateInstance<GameSettings>();
             }
             return _instance; 
         }
     }
-    private static bool isInitialized = false;
+    private static bool isInstance = false;
     #endregion
+
+    public enum GameModeNames
+    {
+        vsPlayer,
+        vsBot,
+        Demo
+    }
 
     public GameTextures GameTextures { get => _gameTextures;
         set
         {
-            GameEventsManager.Instance.GameTexturesChanged();
             _gameTextures = value;
+            GameEventsManager.Instance.GameTexturesChanged();
         }
     }
+  
     public string GameTexturesBundleName
     {
         get => _gameTexturesBundleName != null ? _gameTexturesBundleName : _defaultGameTexturesBundleName;
         set => _gameTexturesBundleName = value;
     }
 
-    public IGameMode GameMode { get => _gameMode; set => _gameMode = value; }
-    public int TurnLength { get => _turnLength; set => _turnLength = value; }
+    public IGameMode GameMode { 
+        get 
+        {
+            if (_isGameModeChanged || _gameMode == null)
+            {
+                _gameMode = GetGameMode(GameModeName);
+                _isGameModeChanged = false;
+            }
+            return _gameMode;
+        }
+        set => _gameMode = value; }
 
+    public GameModeNames GameModeName
+    {
+        get => _gameModeName;
+        set
+        {
+            _isGameModeChanged = true;
+            _gameModeName = value;
+        }
+    }
+    public int TurnLength { get => _turnLength; set => _turnLength = value; }
+    public BotPlayer.Difficulty Difficulty { get => difficulty; set => difficulty = value; }
+
+    private bool isInitialized = false;
     private GameTextures _gameTextures;
     private string _gameTexturesBundleName;
     private readonly string _defaultGameTexturesBundleName = "defaultGameTextures";
 
-    private IGameMode _gameMode = new LocalMultiplayerMode();
+    private IGameMode _gameMode;
+    private GameModeNames _gameModeName = GameModeNames.vsPlayer;
+    private BotPlayer.Difficulty difficulty = BotPlayer.Difficulty.Easy;
     private int _turnLength = 5;
-
+    private bool _isGameModeChanged = false;
 
     private void OnEnable()
     {
         DontDestroyOnLoad(this);
     }
 
-    public void LoadGameTextures()
+    public bool LoadGameTextures(string gameTexturesBundleName)
     {
-        string path = Path.Combine(Application.streamingAssetsPath, GameTexturesBundleName, "bundle", GameTexturesBundleName);
-        AssetBundle myLoadedAssetBundle = AssetBundle.LoadFromFile(path);
+        string path = Path.Combine(Application.streamingAssetsPath, gameTexturesBundleName, "bundle", gameTexturesBundleName);
+
+        if (!File.Exists(path))
+            return false;
+
+        if (gameTexturesBundleName == GameTexturesBundleName && GameTextures != null)
+            return false;
+
+        AssetBundle myLoadedAssetBundle;
+        try
+        {
+            myLoadedAssetBundle = AssetBundle.LoadFromFile(path);
+
+        }
+        catch (System.Exception)
+        {
+            return false;
+        }
+
         GameTextures = myLoadedAssetBundle.LoadAsset<GameTextures>(nameof(GameTextures));
+        GameTexturesBundleName = gameTexturesBundleName;
+
+        myLoadedAssetBundle.UnloadAsync(false);
+
+        return true;
+
     }
 
     public void InitalizeSettings()
     {
-        LoadGameTextures();
+        if (!isInitialized)
+        {
+            LoadGameTextures(GameTexturesBundleName);
+            isInitialized = true;
+        }
     }
+
+    private IGameMode GetGameMode(GameModeNames gameMode)
+    {
+        switch (gameMode)
+        {
+            case GameModeNames.vsPlayer:
+                return new LocalMultiplayerMode();
+            case GameModeNames.vsBot:
+                return new PlayerVsBotMode();
+            case GameModeNames.Demo:
+                return new BotVsBotMode();
+            default:
+                return new LocalMultiplayerMode();
+
+        }
+    }
+
 
 }

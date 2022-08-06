@@ -22,6 +22,8 @@ public class GameOverPanel : MonoBehaviour
         gameObject.SetActive(true);
         string winText = Utilities.FromCamelCase(result.ToString());
         ResultLabel.text = winText;
+
+        SoundManager.Instance.PlayWinSound();
     }
 
     private void HidePanel()

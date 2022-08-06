@@ -7,9 +7,9 @@ namespace TicTacToe
     public class TicTacToeGrid
     {
         public List<TilePosition> AvailablePositions { get => GridState.AvailablePositions; }
-        public GridState GridState { get => _gridState; set => _gridState = value; }
+        public IGridState GridState { get => _gridState; set => _gridState = value; }
 
-        private GridState _gridState;
+        private IGridState _gridState = new GridState(GridSize);
         public static int GridSize => _gridSize;
 
         private static readonly int _gridSize = 3;
@@ -48,10 +48,9 @@ namespace TicTacToe
 
         public void StartGame()
         {
-            GridState = new GridState(GridSize);
             GridState.ResetGrid();
-            _gameMode.StartGame();
-        }
+            _gameMode.StartGame(GridState);
+        }  
 
         public void EndGame(Result result)
         {
@@ -72,7 +71,7 @@ namespace TicTacToe
             }
             else
             {
-                _gameMode.OnPlayerTurn(sign);
+                _gameMode.OnPlayerTurn(sign, GridState);
             }
         }
 
@@ -82,10 +81,15 @@ namespace TicTacToe
             EndGame((Result)oppositeSign);
         }
 
-        private void UndoTurn()
+        public void UndoTurn()
         {
-            GameEventsManager.Instance.UpdateTile(Sign.Empty ,GridState.UndoTurn());
-            GameEventsManager.Instance.UpdateTile(Sign.Empty, GridState.UndoTurn());
+            if (GridState.UndoTurns(2, out List<TilePosition> positions))
+            {
+                foreach (var pos in positions)
+                {
+                    GameEventsManager.Instance.UpdateTile(Sign.Empty, pos);
+                }
+            }
         }
 
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,64 +9,76 @@ namespace TicTacToe
     public class GameGrid : MonoBehaviour
     {
 
-        public Timer TurnTimer;
-        [SerializeField] private Tile TilePrefab;
-        [SerializeField] private int TurnLengthInSeconds; 
+        public HintActivator HintActivator { get => _hintActivator; set => _hintActivator = value; }
+        public TicTacToeGrid Grid { get => _grid; }
+        public Tile[,] TilesGrid { get => _tilesGrid; }
 
-        
+        public Timer TurnTimer;
+        public Tile TilePrefab;
+        [SerializeField] private int TurnLengthInSeconds;
+
+        private HintActivator _hintActivator;
         private TicTacToeGrid _grid;
         private Tile[,] _tilesGrid;
 
         private void Awake()
         {
-            InitalizeGrid();
+            GameEventsManager.Instance.OnWaitForPlayerPress += WaitForPress;
+            GameEventsManager.Instance.OnPlayerTurn += UpdateTile;
+            GameEventsManager.Instance.OnRestartGame += OnRestartGame;
+            GameEventsManager.Instance.OnDisplayHint += OnDisplayHint;
+            GameEventsManager.Instance.OnUpdateTile += UpdateTile;
+            GameEventsManager.Instance.OnTurnTimerEnd += delegate { WaitForPress(false); };
+
+            _grid = new TicTacToeGrid();
+            Grid.InitalizeGame();
+
+            HintActivator = new HintActivator(Grid.GridState, TilesGrid);
         }
 
         private void Start()
         {
+            InitalizeGrid();
             GameEventsManager.Instance.RestartGame();
+        }
+
+        public void UpdateTile (TicTacToeGrid.Sign sign, TilePosition pos)
+        {
+            TilesGrid[pos.Row, pos.Column].UpdateTile(sign);
         }
 
         public void InitalizeGrid()
         {
             CreateTiles();
-            GameEventsManager.Instance.OnWaitForPlayerPress += WaitForPress;
-            GameEventsManager.Instance.OnPlayerTurn += (TicTacToeGrid.Sign sign, TilePosition pos) => {_tilesGrid[pos.Row, pos.Column].UpdateTile(sign); };
-            GameEventsManager.Instance.OnRestartGame += OnRestartGame;
-            GameEventsManager.Instance.OnDisplayHint += OnDisplayHint;
-            GameEventsManager.Instance.OnTurnTimerEnd += () => WaitForPress(false);
 
-
-            _grid = new TicTacToeGrid();
-            _grid.InitalizeGame();
         }
 
-        private void OnRestartGame()
+        public void OnRestartGame()
         {
             ResetGrid();
         }
 
 
 
-        private void WaitForPress(bool isOn) 
+        public void WaitForPress(bool isOn) 
         {
-            var availablePositions = _grid.AvailablePositions;
+            var availablePositions = Grid.AvailablePositions;
             foreach (var pos in availablePositions)
             {
-                _tilesGrid[pos.Row, pos.Column].SetActiveButton(isOn);
+                TilesGrid[pos.Row, pos.Column].SetActiveButton(isOn);
             }
 
         }
 
         private void ResetGrid()
         {
-            foreach(Tile tile in _tilesGrid)
+            foreach(Tile tile in TilesGrid)
             {
                 tile.ResetTile();
             }
         }
 
-        private void CreateTiles()
+        public void CreateTiles()
         {
             int gridSize = TicTacToeGrid.GridSize;
             _tilesGrid = new Tile[gridSize, gridSize];
@@ -78,15 +91,14 @@ namespace TicTacToe
                     Tile tile = Instantiate(TilePrefab, transform);
                     TilePosition pos = new TilePosition(row, column);
                     tile.OnTileClicked += delegate { GameEventsManager.Instance.TilePress(pos); };
-                    _tilesGrid[row, column] = tile;
+                    TilesGrid[row, column] = tile;
                 }
             }
         }
 
-        private void OnDisplayHint(int length)
+        public void OnDisplayHint(int length)
         {
-            TilePosition hint = MiniMaxAlgorithm.GetBestMove(_grid.GridState);
-            _tilesGrid[hint.Row, hint.Column].Flicker(length);
+            HintActivator.ActivateHint(length);
         }
     }
 }

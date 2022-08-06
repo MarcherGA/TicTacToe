@@ -10,11 +10,12 @@ namespace TicTacToe
     {
         private Button _button;
 
-        private void Start()
+        private void Awake()
         {
             _button = GetComponent<Button>();
             GameEventsManager.Instance.OnDisplayUndoButton += delegate { gameObject.SetActive(true); };
             _button.onClick.AddListener(GameEventsManager.Instance.UndoTurn);
+            gameObject.SetActive(false);
         }
 
     }

@@ -9,8 +9,8 @@ namespace TicTacToe
         public bool AllowUndo { get; }
 
         public void InitalizeGame();
-        public void StartGame();
+        public void StartGame(IGridState grid);
         public void EndGame(TicTacToeGrid.Result result);
-        public void OnPlayerTurn(TicTacToeGrid.Sign sign);
+        public void OnPlayerTurn(TicTacToeGrid.Sign sign, IGridState grid);
     }
 }

@@ -6,16 +6,17 @@ namespace TicTacToe
 {
     public class TurnTimer : Timer
     {
-        private void Awake()
+        private void OnEnable()
         {
             TimerLength = GameSettings.Instance.TurnLength;
-             OnTimerEnd += GameEventsManager.Instance.TurnTimerEnd;
+            OnTimerEnd += GameEventsManager.Instance.TurnTimerEnd;
             GameEventsManager.Instance.OnResetTurnTimer += ResetTimer;
             GameEventsManager.Instance.OnSetActiveTurnTimer += gameObject.SetActive;
         }
 
         private void OnDisable()
         {
+            GameEventsManager.Instance.OnResetTurnTimer -= ResetTimer;
             Stop();
         }
     }
